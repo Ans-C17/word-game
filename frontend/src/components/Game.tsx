@@ -1,17 +1,17 @@
-import { useEffect, useState } from "react";
+import { useMemo, useEffect, useState } from "react";
 import Timer from "./Timer";
 import { Input } from "@/components/ui/input";
 import wordsList from "@/data/words.json";
 import starterWordsList from "@/data/starters.json";
 import BaseRules from "./BaseRules";
 import BottomWords from "./BottomWords";
-import NewRandomRules from "./NewRandomRules";
+import NewRandomRules from "./NewRule";
 import GameOver from "./GameOver";
 
+const alphabets = "abcdefghijklmnopqrstuvwxyz".split("");
+const wordSet = new Set(wordsList);
 const startWord =
   starterWordsList[Math.floor(Math.random() * starterWordsList.length)];
-
-const wordSet = new Set(wordsList);
 
 function hasCommonLetter(currWord: string, prevWord: string) {
   for (let letter of prevWord) {
@@ -46,10 +46,49 @@ export default function Game() {
   const [inputValue, setInputValue] = useState("");
   const [isGameOver, setIsGameOver] = useState(false);
   const [currTime, setCurrTime] = useState(timeout);
+  const [choosableAlphabets, setChoosableAlphabets] = useState(alphabets);
+
+  const chosenAlphabet =
+    choosableAlphabets[Math.floor(Math.random() * choosableAlphabets.length)];
+  const wordLength = Math.floor(Math.random() * typedWords.length);
 
   useEffect(() => {
-    if (currTime <= 0) setIsGameOver(true);
-  }, [currTime]);
+    setChoosableAlphabets(
+      alphabets.filter(
+        (alphabet) =>
+          !(
+            typedWords.length > 0
+              ? typedWords[typedWords.length - 1]
+              : startWord
+          ).includes(alphabet),
+      ),
+    );
+  }, [typedWords]);
+
+  const newRules = {
+    1: `Can't use the letter ${chosenAlphabet}`,
+    2: `Must use the letter ${chosenAlphabet}`,
+    3: `Word length should be greater than ${wordLength}`,
+    4: "Must not repeat any letter",
+    5: "Must repeat a letter",
+  };
+
+  const newRandomRule = useMemo(() => {
+    return Object.values(newRules)[
+      Math.floor(Math.random() * Object.values(newRules).length)
+    ];
+  }, [choosableAlphabets]);
+
+  function wordObeysNewRules(ruleId: Number, word: string) {
+    switch (ruleId) {
+      case 1:
+        console.log("it is rule 1");
+        return false;
+
+      default:
+        break;
+    }
+  }
 
   function handleInput(text: string) {
     setInputValue(text);
@@ -57,8 +96,12 @@ export default function Game() {
     if (text.at(-1) == " ") {
       if (text != " ") {
         text = text.trim();
-        if (wordObeysBasicRules(text, typedWords, startWord) && currTime > 0) {
+        if (wordObeysBasicRules(text, typedWords, startWord)) {
           setTypedWords((prev) => [...prev, inputValue]);
+
+          if (typedWords.length >= 5 && !wordObeysNewRules(1, text)) {
+            setIsGameOver(true);
+          }
         } else {
           setIsGameOver(true);
         }
@@ -67,6 +110,11 @@ export default function Game() {
       setInputValue("");
     }
   }
+
+  //IF TIME IS OVER GAME ENDS OBVIOUSLY
+  useEffect(() => {
+    if (currTime <= 0) setIsGameOver(true);
+  }, [currTime]);
 
   return (
     <main className="bg-yellow-100 flex flex-col gap-4 sm:gap-6 md:gap-8 h-screen justify-center items-center p-4 sm:p-6 md:p-10 overflow-hidden relative">
@@ -78,7 +126,7 @@ export default function Game() {
 
       <BaseRules typedWords={typedWords} startWord={startWord} />
 
-      <NewRandomRules typedWords={typedWords} startWord={startWord} />
+      {typedWords.length >= 5 && <NewRandomRules rule={newRandomRule} />}
 
       <Input
         className="w-full max-w-sm sm:max-w-xl md:max-w-2xl h-14 sm:h-16 md:h-20 text-lg sm:text-xl md:text-2xl bg-white border-yellow-400 border-2 focus-visible:border-black focus-visible:ring-0 font-mono placeholder:text-gray-400 px-4 sm:px-5 md:px-6 py-2 sm:py-3 md:py-4"

@@ -1,3 +1,5 @@
+//TODO: MUST TELL REASON WHY U LOST ELSE IT AINT INTUITIVE
+
 export default function GameOver() {
   const score = 12;
 
