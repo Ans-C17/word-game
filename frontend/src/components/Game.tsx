@@ -67,23 +67,25 @@ export default function Game() {
 
   const newRules = {
     1: `Can't use the letter ${chosenAlphabet}`,
-    2: `Must use the letter ${chosenAlphabet}`,
-    3: `Word length should be greater than ${wordLength}`,
-    4: "Must not repeat any letter",
-    5: "Must repeat a letter",
+    // 2: `Must use the letter ${chosenAlphabet}`,
+    // 3: `Word length should be greater than ${wordLength}`,
+    // 4: "Must not repeat any letter",
+    // 5: "Must repeat a letter",
   };
 
   const newRandomRule = useMemo(() => {
-    return Object.values(newRules)[
-      Math.floor(Math.random() * Object.values(newRules).length)
-    ];
+    const [key, value] =
+      Object.entries(newRules)[
+        Math.floor(Math.random() * Object.values(newRules).length)
+      ];
+
+    return [key, value];
   }, [choosableAlphabets]);
 
-  function wordObeysNewRules(ruleId: Number, word: string) {
+  function wordObeysNewRules(ruleId: string, word: string) {
     switch (ruleId) {
-      case 1:
-        console.log("it is rule 1");
-        return false;
+      case "1":
+        return !word.includes(chosenAlphabet);
 
       default:
         break;
@@ -96,15 +98,12 @@ export default function Game() {
     if (text.at(-1) == " ") {
       if (text != " ") {
         text = text.trim();
-        if (wordObeysBasicRules(text, typedWords, startWord)) {
-          setTypedWords((prev) => [...prev, inputValue]);
-
-          if (typedWords.length >= 5 && !wordObeysNewRules(1, text)) {
-            setIsGameOver(true);
-          }
-        } else {
+        if (
+          !wordObeysBasicRules(text, typedWords, startWord) ||
+          (typedWords.length >= 1 && !wordObeysNewRules(newRandomRule[0], text))
+        ) {
           setIsGameOver(true);
-        }
+        } else setTypedWords((prev) => [...prev, inputValue]);
       }
 
       setInputValue("");
@@ -121,12 +120,16 @@ export default function Game() {
       {isGameOver && <GameOver />}
 
       <div className="absolute top-10 sm:top-14 md:top-20 right-10 sm:right-14 md:right-20">
-        <Timer currTime={currTime} setCurrTime={setCurrTime} />
+        <Timer
+          currTime={currTime}
+          setCurrTime={setCurrTime}
+          gameOver={isGameOver}
+        />
       </div>
 
       <BaseRules typedWords={typedWords} startWord={startWord} />
 
-      {typedWords.length >= 5 && <NewRandomRules rule={newRandomRule} />}
+      {typedWords.length >= 1 && <NewRandomRules rule={newRandomRule[1]} />}
 
       <Input
         className="w-full max-w-sm sm:max-w-xl md:max-w-2xl h-14 sm:h-16 md:h-20 text-lg sm:text-xl md:text-2xl bg-white border-yellow-400 border-2 focus-visible:border-black focus-visible:ring-0 font-mono placeholder:text-gray-400 px-4 sm:px-5 md:px-6 py-2 sm:py-3 md:py-4"

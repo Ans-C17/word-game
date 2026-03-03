@@ -3,11 +3,12 @@ import { useEffect } from "react";
 interface TimerProps {
   currTime: number;
   setCurrTime: React.Dispatch<React.SetStateAction<number>>;
+  gameOver: boolean;
 }
 
-export default function Timer({ currTime, setCurrTime }: TimerProps) {
+export default function Timer({ currTime, setCurrTime, gameOver }: TimerProps) {
   useEffect(() => {
-    if (currTime <= 0) {
+    if (currTime <= 0 || gameOver == true) {
       return;
     }
 
@@ -19,7 +20,7 @@ export default function Timer({ currTime, setCurrTime }: TimerProps) {
   }, [currTime]);
 
   const getColor = () => {
-    if (currTime > 10) return "text-green-600";
+    if (currTime > 10) return "text-green-400";
     if (currTime > 5) return "text-amber-500";
     return "text-red-500";
   };
