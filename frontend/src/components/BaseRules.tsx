@@ -15,7 +15,7 @@ export default function BaseRules({ typedWords, startWord }: BaseRulesProps) {
       </span>
       <div>
         <span className="text-green-700 font-mono text-base sm:text-lg md:text-xl whitespace-pre-wrap">
-          {"2. Must not use any letters from:"}
+          {"2. Must not use any letters from previous word:"}
         </span>
         <span className="bg-blue-600 px-2 py-1 text-white ml-2 rounded-sm font-mono text-base sm:text-lg md:text-xl">
           {bannedWord}

@@ -48,9 +48,15 @@ export default function Game() {
   const [currTime, setCurrTime] = useState(timeout);
   const [choosableAlphabets, setChoosableAlphabets] = useState(alphabets);
 
-  const chosenAlphabet =
-    choosableAlphabets[Math.floor(Math.random() * choosableAlphabets.length)];
-  const wordLength = Math.floor(Math.random() * typedWords.length);
+  const chosenAlphabet = useMemo(() => {
+    return choosableAlphabets[
+      Math.floor(Math.random() * choosableAlphabets.length)
+    ];
+  }, [choosableAlphabets]);
+
+  const wordLength = useMemo(() => {
+    return Math.floor(Math.random() * 3) + 3;
+  }, [typedWords]);
 
   useEffect(() => {
     setChoosableAlphabets(
@@ -67,10 +73,10 @@ export default function Game() {
 
   const newRules = {
     1: `Can't use the letter ${chosenAlphabet}`,
-    // 2: `Must use the letter ${chosenAlphabet}`,
-    // 3: `Word length should be greater than ${wordLength}`,
-    // 4: "Must not repeat any letter",
-    // 5: "Must repeat a letter",
+    2: `Must use the letter ${chosenAlphabet}`,
+    3: `Word length should be greater than ${wordLength}`,
+    4: "Must not repeat any letter",
+    5: "Must repeat a letter",
   };
 
   const newRandomRule = useMemo(() => {
@@ -87,8 +93,19 @@ export default function Game() {
       case "1":
         return !word.includes(chosenAlphabet);
 
-      default:
-        break;
+      case "2":
+        return word.includes(chosenAlphabet);
+
+      case "3":
+        return word.length > wordLength;
+
+      case "4":
+        const uniqCharsCase4 = new Set(word);
+        return uniqCharsCase4.size == word.length;
+
+      case "5":
+        const uniqCharsCase5 = new Set(word);
+        return uniqCharsCase5.size != word.length;
     }
   }
 
@@ -100,7 +117,7 @@ export default function Game() {
         text = text.trim();
         if (
           !wordObeysBasicRules(text, typedWords, startWord) ||
-          (typedWords.length >= 1 && !wordObeysNewRules(newRandomRule[0], text))
+          (typedWords.length >= 5 && !wordObeysNewRules(newRandomRule[0], text))
         ) {
           setIsGameOver(true);
         } else setTypedWords((prev) => [...prev, inputValue]);
@@ -115,6 +132,7 @@ export default function Game() {
     if (currTime <= 0) setIsGameOver(true);
   }, [currTime]);
 
+  //THE OFFICIAL RETURN STATEMENT
   return (
     <main className="bg-yellow-100 flex flex-col gap-4 sm:gap-6 md:gap-8 h-screen justify-center items-center p-4 sm:p-6 md:p-10 overflow-hidden relative">
       {isGameOver && <GameOver />}
@@ -129,7 +147,7 @@ export default function Game() {
 
       <BaseRules typedWords={typedWords} startWord={startWord} />
 
-      {typedWords.length >= 1 && <NewRandomRules rule={newRandomRule[1]} />}
+      {typedWords.length >= 5 && <NewRandomRules rule={newRandomRule[1]} />}
 
       <Input
         className="w-full max-w-sm sm:max-w-xl md:max-w-2xl h-14 sm:h-16 md:h-20 text-lg sm:text-xl md:text-2xl bg-white border-yellow-400 border-2 focus-visible:border-black focus-visible:ring-0 font-mono placeholder:text-gray-400 px-4 sm:px-5 md:px-6 py-2 sm:py-3 md:py-4"
@@ -141,7 +159,9 @@ export default function Game() {
         onCopy={(e) => e.preventDefault()}
         onCut={(e) => e.preventDefault()}
         onDrop={(e) => e.preventDefault()}
-        //TODO: ENTER SHOULD ALSO SUBMIT WORD
+        onKeyDown={(e) => {
+          if (e.key == "Enter") handleInput(inputValue + " "); //MUST ADD SPACE AT THE END SO HANDLEINPUT WORKS
+        }}
       />
 
       <BottomWords typedWords={typedWords} />
