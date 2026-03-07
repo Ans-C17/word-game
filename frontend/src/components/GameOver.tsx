@@ -1,4 +1,17 @@
 //TODO: TELL REASON OF FAILURE (MUST)
+const challengeLines = [
+  "Challenge that one salty ahh friend",
+  "Send this to your tryhard friend",
+  "Send to the guy who said he is better",
+  "Share to humble your bestie",
+  "Forward this to your rival",
+  "Challenge your squad try to beat this",
+  "Challenge that competitive friend",
+];
+
+const randomChallenge =
+  challengeLines[Math.floor(Math.random() * challengeLines.length)];
+
 type CustomBtnProps = {
   text: string;
   mode?: "yellow" | "danger";
@@ -49,8 +62,11 @@ function CustomBtn({ text, mode = "yellow" }: CustomBtnProps) {
   );
 }
 
-export default function GameOver() {
-  const score = 12;
+interface GameOverProps {
+  score: number;
+}
+
+export default function GameOver({ score }: GameOverProps) {
   const shadowString = `
   rgba(0, 0, 0, 0.17) 0px -23px 25px 0px inset,
   rgba(0, 0, 0, 0.6) 0px 2px 1px,
@@ -68,10 +84,14 @@ export default function GameOver() {
         }}
       >
         <p
-          className="text-xs font-bold tracking-[0.25em] uppercase text-yellow-400 mb-4"
+          className="text-3xl font-bold tracking-[0.25em] uppercase text-yellow-400 mb-1"
           style={{ textShadow: "0 1px 6px rgba(234,179,8,0.35)" }}
         >
           Game Over
+        </p>
+
+        <p className="text-md font-medium text-red-500 mb-3 mt-4">
+          Violated Special Rule
         </p>
         <div
           className="text-9xl font-black leading-none text-yellow-400 tabular-nums"
@@ -100,13 +120,13 @@ export default function GameOver() {
           className="text-gray-600 text-lg font-semibold tracking-tight mb-6"
           style={{ textShadow: "0 1px 4px rgba(0,0,0,0.07)" }}
         >
-          Share with friends
+          {randomChallenge}
         </p>
 
         {/* Buttons */}
         <div className="flex gap-3">
-          <CustomBtn text="Again" mode="yellow" />
-          <CustomBtn text="Send" mode="danger" />
+          <CustomBtn text="Play Again" mode="yellow" />
+          <CustomBtn text="Challenge" mode="danger" />
         </div>
       </div>
     </div>

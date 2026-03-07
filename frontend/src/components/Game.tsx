@@ -7,6 +7,7 @@ import BaseRules from "./BaseRules";
 import BottomWords from "./BottomWords";
 import NewRandomRules from "./NewRule";
 import GameOver from "./GameOver";
+import { toast } from "sonner";
 
 const alphabets = "abcdefghijklmnopqrstuvwxyz".split("");
 const wordSet = new Set(wordsList);
@@ -34,8 +35,7 @@ function wordObeysBasicRules(
       typedWords.length > 0 ? typedWords[typedWords.length - 1] : startWord,
     ) &&
     text != startWord &&
-    !typedWords.includes(text) &&
-    wordSet.has(text)
+    !typedWords.includes(text)
   );
 }
 
@@ -55,7 +55,7 @@ export default function Game() {
   }, [choosableAlphabets]);
 
   const wordLength = useMemo(() => {
-    return Math.floor(Math.random() * 3) + 3;
+    return Math.floor(Math.random() * 3) + 1;
   }, [typedWords]);
 
   useEffect(() => {
@@ -73,10 +73,13 @@ export default function Game() {
 
   const newRules = {
     1: `Can't use the letter ${chosenAlphabet}`,
-    2: `Must use the letter ${chosenAlphabet}`,
-    3: `Word length should be greater than ${wordLength}`,
-    4: "Must not repeat any letter",
-    5: "Must repeat a letter",
+    2: `Word Must use the letter ${chosenAlphabet}`,
+    3: `Word length must be atleast ${wordLength}`,
+    4: "Word must not repeat any letter",
+    5: "Word must repeat a letter",
+    6: `Word must start with ${chosenAlphabet}`,
+    7: `Word must end  with ${chosenAlphabet}`,
+    8: "Word must have a vowel",
   };
 
   const newRandomRule = useMemo(() => {
@@ -106,6 +109,15 @@ export default function Game() {
       case "5":
         const uniqCharsCase5 = new Set(word);
         return uniqCharsCase5.size != word.length;
+
+      case "6":
+        return word.startsWith(chosenAlphabet);
+
+      case "7":
+        return word.endsWith(chosenAlphabet);
+
+      case "8":
+        return [...word].some((c) => "aeiou".includes(c));
     }
   }
 
@@ -115,12 +127,28 @@ export default function Game() {
     if (text.at(-1) == " ") {
       if (text != " ") {
         text = text.trim();
-        if (
+        if (!wordSet.has(text)) {
+          if (text.length <= 2) {
+            toast.warning("Word length must be greater than 2", {
+              duration: 1200,
+              className:
+                "bg-red-600 text-white border border-red-800 font-mono font-semibold px-4 py-3 rounded-md",
+            });
+          } else {
+            toast.warning("Invalid word", {
+              duration: 1200,
+              className:
+                "bg-red-600 text-white border border-red-800 font-mono font-semibold px-4 py-3 rounded-md",
+            });
+          }
+        } else if (
           !wordObeysBasicRules(text, typedWords, startWord) ||
           (typedWords.length >= 5 && !wordObeysNewRules(newRandomRule[0], text))
         ) {
           setIsGameOver(true);
-        } else setTypedWords((prev) => [...prev, inputValue]);
+        } else {
+          setTypedWords((prev) => [...prev, inputValue]);
+        }
       }
 
       setInputValue("");
@@ -135,7 +163,7 @@ export default function Game() {
   //THE OFFICIAL RETURN STATEMENT
   return (
     <main className="bg-yellow-100 flex flex-col gap-4 sm:gap-6 md:gap-8 h-screen justify-center items-center p-4 sm:p-6 md:p-10 overflow-hidden relative">
-      {isGameOver && <GameOver />}
+      {isGameOver && <GameOver score={typedWords.length} />}
 
       <div className="absolute top-10 sm:top-14 md:top-20 right-10 sm:right-14 md:right-20">
         <Timer
