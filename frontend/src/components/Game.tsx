@@ -8,6 +8,7 @@ import BottomWords from "./BottomWords";
 import NewRandomRules from "./NewRule";
 import GameOver from "./GameOver";
 import { toast } from "sonner";
+import Instruction from "./Instruction";
 
 const alphabets = "abcdefghijklmnopqrstuvwxyz".split("");
 const wordSet = new Set(wordsList);
@@ -47,6 +48,7 @@ export default function Game() {
   const [isGameOver, setIsGameOver] = useState(false);
   const [currTime, setCurrTime] = useState(timeout);
   const [choosableAlphabets, setChoosableAlphabets] = useState(alphabets);
+  const [startGame, setStartGame] = useState(false);
 
   const chosenAlphabet = useMemo(() => {
     return choosableAlphabets[
@@ -130,13 +132,11 @@ export default function Game() {
         if (!wordSet.has(text)) {
           if (text.length <= 2) {
             toast.warning("Word length must be greater than 2", {
-              duration: 1200,
               className:
                 "bg-red-600 text-white border border-red-800 font-mono font-semibold px-4 py-3 rounded-md",
             });
           } else {
             toast.warning("Invalid word", {
-              duration: 1200,
               className:
                 "bg-red-600 text-white border border-red-800 font-mono font-semibold px-4 py-3 rounded-md",
             });
@@ -164,13 +164,16 @@ export default function Game() {
   return (
     <main className="bg-yellow-100 flex flex-col gap-4 sm:gap-6 md:gap-8 h-screen justify-center items-center p-4 sm:p-6 md:p-10 overflow-hidden relative">
       {isGameOver && <GameOver score={typedWords.length} />}
+      {!startGame && <Instruction onStart={() => setStartGame(true)} />}
 
       <div className="absolute top-10 sm:top-14 md:top-20 right-10 sm:right-14 md:right-20">
-        <Timer
-          currTime={currTime}
-          setCurrTime={setCurrTime}
-          gameOver={isGameOver}
-        />
+        {startGame && (
+          <Timer
+            currTime={currTime}
+            setCurrTime={setCurrTime}
+            gameOver={isGameOver}
+          />
+        )}
       </div>
 
       <BaseRules typedWords={typedWords} startWord={startWord} />
